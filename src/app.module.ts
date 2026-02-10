@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
-import { AuthModule } from './auth/auth.module';
 import { SaleModule } from './sale/sale.module';
 import { ClientModule } from './client/client.module';
 import { SaleDetailModule } from './sale-detail/sale-detail.module';
@@ -30,7 +29,7 @@ import { CommonModule } from './common/common.module';
       entities: [User, Client, Sale, SaleDetail, Product],
       //synchronize: true,
     }),
-    UserModule, ProductModule, AuthModule, SaleModule, ClientModule, SaleDetailModule, CommonModule],
+    UserModule, ProductModule, SaleModule, ClientModule, SaleDetailModule, CommonModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { JwtAuthGuard } from 'src/user/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/user/guards/roles.guard';
+import { User } from './entities/user.entity';
+import { Auth } from './decorators/auth.decorator';
+import { GetUser } from './decorators/get-user.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -16,13 +19,16 @@ export class UserController {
   }
 
   @Get()
+  @Auth()
   findAll() {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  findOne(
+    @GetUser() user: User
+  ) {
+    return this.userService.findOne(user.id);
   }
 
   @Patch(':id')
