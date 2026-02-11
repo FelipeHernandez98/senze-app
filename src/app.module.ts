@@ -27,7 +27,7 @@ import { CommonModule } from './common/common.module';
       password: process.env.DB_PASSWORD,
       schema: process.env.DB_SCHEMA,
       entities: [User, Client, Sale, SaleDetail, Product],
-      //synchronize: true,
+      synchronize: true,
     }),
     UserModule, ProductModule, SaleModule, ClientModule, SaleDetailModule, CommonModule],
   controllers: [AppController],

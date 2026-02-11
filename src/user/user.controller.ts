@@ -2,14 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/user/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/user/guards/roles.guard';
 import { User } from './entities/user.entity';
 import { Auth } from './decorators/auth.decorator';
 import { GetUser } from './decorators/get-user.decorator';
+import { CreateUserWithRoleDto } from './dto/create-user-with-role.dto';
+import { Roles } from 'src/common/enums/roles.enum';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -18,13 +18,20 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Post('admin')
+  @Auth( Roles.administrator)
+  createAdmin(@Body() createUserWithRole: CreateUserWithRoleDto) {
+    return this.userService.CreateUserWithRole(createUserWithRole);
+  }
+
   @Get()
   @Auth()
   findAll() {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get('findById')
+  @Auth( Roles.administrator , Roles.user )
   findOne(
     @GetUser() user: User
   ) {
@@ -39,5 +46,18 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Post('login')
+  loginUser(@Body() loginUserDto: LoginUserDto){
+    return this.userService.login( loginUserDto );
+  }
+
+  @Get('check-status')
+  @Auth()
+  checkAuthStatus(
+    @GetUser() user: User
+  ){
+    return this.userService.checkAuthStatus( user );
   }
 }

@@ -17,4 +17,8 @@ export class CustomExceptions {
     static ThereAreNoRecordsException(): NotFoundException {
         return new NotFoundException('There is no record');
     }
+
+    static UnauthorizedException(): UnauthorizedException {
+        return new UnauthorizedException('Username or password is incorrect');
+    }
 }
