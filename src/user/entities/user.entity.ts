@@ -15,7 +15,7 @@ export class User {
     @Column({ name: 'last_name' })
     lastName: string;
 
-    @Column()
+    @Column({ select: false })
     password: string;
 
     @Column({ name: 'state_id' })

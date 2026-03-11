@@ -1,6 +1,10 @@
-import { IsUUID, IsInt, Min, IsPositive } from 'class-validator';
+import { IsUUID, IsInt, Min, IsOptional } from 'class-validator';
 
 export class CreateSaleDetailDto {
+
+  @IsOptional()
+  @IsUUID()
+  saleId?: string;
 
   @IsUUID()
   productId: string;

@@ -30,7 +30,6 @@ import { JwtStrategy } from './strategies/jwt.sstrategy';
   ],
   exports: [ 
     TypeOrmModule, 
-    TypeOrmModule,
     JwtStrategy,
     PassportModule,
     JwtModule 

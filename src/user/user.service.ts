@@ -30,11 +30,12 @@ export class UserService {
       ...createUserDto,
       stateId: StatesEnum.ACTIVE,
       createdAt: new Date(),
-      roleId: 1
+      roleId: 1,
+      password: await bcrypt.hash(createUserDto.password, 10),
     });
-    user.password = await bcrypt.hash(user.password, 10);
-    delete user.password;
-    return this.userRepository.save(user);
+
+    const savedUser = await this.userRepository.save(user);
+    return this.sanitizeUser(savedUser);
   }
 
   async CreateUserWithRole(createUserWithRoleDto: CreateUserWithRoleDto) {
@@ -45,11 +46,12 @@ export class UserService {
     const user = this.userRepository.create({
       ...createUserWithRoleDto,
       stateId: StatesEnum.ACTIVE,
-      createdAt: new Date()
+      createdAt: new Date(),
+      password: await bcrypt.hash(createUserWithRoleDto.password, 10),
     });
-    user.password = await bcrypt.hash(user.password, 10);
-    delete user.password;
-    return this.userRepository.save(user);
+
+    const savedUser = await this.userRepository.save(user);
+    return this.sanitizeUser(savedUser);
   }
 
   async findAll(): Promise<User[]> {
@@ -57,7 +59,7 @@ export class UserService {
     if (users.length === 0) {
       throw CustomExceptions.ThereAreNoRecordsException();
     }
-    return users;
+    return users.map((user) => this.sanitizeUser(user));
   }
 
   async findOne(id: string): Promise<User> {
@@ -65,16 +67,30 @@ export class UserService {
     if (!user) {
       throw CustomExceptions.UserNotFoundException(id);
     }
-    delete user.password;
-    return user;
+    return this.sanitizeUser(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.userRepository.update(id, { ...updateUserDto });
-    const updatedUser = await this.findOne(id);
-    if (!updatedUser) {
+    const userToUpdate = await this.userRepository.findOne({ where: { id } });
+    if (!userToUpdate) {
       throw CustomExceptions.UserNotFoundException(id);
     }
+
+    if (updateUserDto.username && updateUserDto.username !== userToUpdate.username) {
+      const existingUser = await this.userRepository.findOne({ where: { username: updateUserDto.username } });
+      if (existingUser) {
+        throw CustomExceptions.UserAlreadyExistsException(updateUserDto.username);
+      }
+    }
+
+    const payload: UpdateUserDto = { ...updateUserDto };
+    if (updateUserDto.password) {
+      payload.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    await this.userRepository.update(id, payload);
+    const updatedUser = await this.findOne(id);
+
     return updatedUser;
   }
 
@@ -94,7 +110,7 @@ export class UserService {
     });
 
     if( !user )
-      CustomExceptions.UnauthorizedException();
+      throw CustomExceptions.UnauthorizedException();
 
     const response = await bcrypt.compare(password, user.password);
 
@@ -107,8 +123,10 @@ export class UserService {
   }
 
   checkAuthStatus(user: User) {
+    const userWithoutPassword = this.sanitizeUser(user);
+
     return {
-      ...user,
+      ...userWithoutPassword,
       token: this.getJwtToken({ id: user.id, roleId: user.roleId })
     }
   }
@@ -116,5 +134,10 @@ export class UserService {
   private getJwtToken( payload: JwtPayload ){
     const token = this.jwtService.sign( payload );
     return token;
+  }
+
+  private sanitizeUser(user: User): User {
+    const { password, ...rest } = user;
+    return rest as User;
   }
 }
