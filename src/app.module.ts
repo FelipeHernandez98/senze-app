@@ -14,6 +14,8 @@ import { Sale } from './sale/entities/sale.entity';
 import { SaleDetail } from './sale-detail/entities/sale-detail.entity';
 import { Product } from './product/entities/product.entity';
 import { CommonModule } from './common/common.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -29,7 +31,15 @@ import { CommonModule } from './common/common.module';
       entities: [User, Client, Sale, SaleDetail, Product],
       synchronize: true,
     }),
-    UserModule, ProductModule, SaleModule, ClientModule, SaleDetailModule, CommonModule],
+    UserModule,
+    ProductModule,
+    SaleModule,
+    ClientModule,
+    SaleDetailModule,
+    CommonModule,
+    AnalyticsModule,
+    InvoiceModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

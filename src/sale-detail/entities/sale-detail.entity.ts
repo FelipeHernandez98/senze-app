@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { Sale } from '../../sale/entities/sale.entity';
 import { Product } from '../../product/entities/product.entity';
 
+@Index('IDX_SALE_DETAILS_PRODUCT', ['product'])
 @Entity('sale_details' , { schema: 'senzeschema' })
 export class SaleDetail {
 

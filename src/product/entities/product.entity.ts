@@ -15,6 +15,9 @@ export class Product {
     @Column()
     stock: number;
 
+    @Column({ name: 'min_stock', default: 5 })
+    minStock: number;
+
     @Column('decimal', { precision: 10, scale: 2 })
     price: number;
 

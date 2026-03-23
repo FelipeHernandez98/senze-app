@@ -21,7 +21,10 @@ export class ProductService {
       throw new ConflictException(`Product with reference ${createProductDto.reference} already exists`);
     }
 
-    const product = this.productRepository.create(createProductDto);
+    const product = this.productRepository.create({
+      ...createProductDto,
+      minStock: createProductDto.minStock ?? 5,
+    });
     return this.productRepository.save(product);
   }
 
