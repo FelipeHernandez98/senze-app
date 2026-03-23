@@ -27,9 +27,14 @@ export class SaleService {
     }
 
     return this.dataSource.transaction(async (manager) => {
+      const nextInvoiceNumber = await this.getNextInvoiceNumber(manager);
+
       const sale = manager.create(Sale, {
         user: { id: user.id } as User,
         client,
+        invoiceNumber: nextInvoiceNumber,
+        paymentMethod: createSaleDto.paymentMethod,
+        status: createSaleDto.status,
         total: 0,
       });
 
@@ -105,6 +110,14 @@ export class SaleService {
         existingSale.client = client;
       }
 
+      if (updateSaleDto.paymentMethod) {
+        existingSale.paymentMethod = updateSaleDto.paymentMethod;
+      }
+
+      if (updateSaleDto.status) {
+        existingSale.status = updateSaleDto.status;
+      }
+
       if (updateSaleDto.details && updateSaleDto.details.length > 0) {
         const currentDetails = await manager.find(SaleDetail, {
           where: { sale: { id } },
@@ -174,5 +187,14 @@ export class SaleService {
       await manager.delete(SaleDetail, { sale: { id } });
       await manager.delete(Sale, { id });
     });
+  }
+
+  private async getNextInvoiceNumber(manager: DataSource['manager']): Promise<number> {
+    const raw = await manager
+      .createQueryBuilder(Sale, 'sale')
+      .select('COALESCE(MAX(sale.invoiceNumber), 0)', 'max')
+      .getRawOne<{ max: string }>();
+
+    return Number(raw?.max ?? 0) + 1;
   }
 }
